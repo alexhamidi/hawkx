@@ -9,18 +9,27 @@ Auth pattern:
   - cookies: auth_token + ct0             — the user's session identity
 """
 
-import requests
-from .creds import get_cookies
-from .constants import BEARER
+import os
 
-_cookies = None
+import requests
+from .constants import BEARER
+from .creds import get_cookies
+
+_profile = None
+_cookies_cache: dict = {}
+
+
+def set_chrome_profile(profile: str | None) -> None:
+    global _profile, _cookies_cache
+    _profile = profile
+    _cookies_cache.clear()
 
 
 def _get_cookies() -> dict:
-    global _cookies
-    if _cookies is None:
-        _cookies = get_cookies(".x.com")
-    return _cookies
+    profile = _profile or os.environ.get("CHROME_PROFILE", "1")
+    if profile not in _cookies_cache:
+        _cookies_cache[profile] = get_cookies(".x.com", profile=profile)
+    return _cookies_cache[profile]
 
 
 def gql_get(path: str, params: dict) -> dict:
@@ -35,6 +44,10 @@ def gql_get(path: str, params: dict) -> dict:
         Parsed JSON response. Raises on non-2xx.
     """
     cookies = _get_cookies()
+    if "ct0" not in cookies or "auth_token" not in cookies:
+        raise SystemExit(
+            "Missing X session. Log into x.com in Chrome (Profile from ~/.hawkx/settings.json), then try again."
+        )
     resp = requests.get(
         f"https://x.com/i/api/graphql/{path}",
         params=params,

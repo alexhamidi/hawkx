@@ -24,9 +24,12 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-CHROME_COOKIES_PATH = os.path.expanduser(
-    "~/Library/Application Support/Google/Chrome/Profile 1/Cookies"
-)
+def _chrome_profile_path(profile: str = "1") -> str:
+    if profile.isdigit():
+        profile = f"Profile {profile}"
+    return os.path.expanduser(
+        f"~/Library/Application Support/Google/Chrome/{profile}/Cookies"
+    )
 
 _key_cache = None
 
@@ -72,21 +75,23 @@ def _decrypt(encrypted: bytes, key: bytes) -> str:
 
 
 
-def get_cookies(domain: str) -> dict:
+def get_cookies(domain: str, profile: str = "1") -> dict:
     """
     Return a dict of cookie name -> decrypted value for the given domain.
 
     Args:
         domain: Host key to filter by (e.g. ".x.com", ".google.com")
+        profile: Chrome profile name (e.g. "1", "Profile 1", "Default")
     """
     key = _chrome_key()
+    cookies_path = _chrome_profile_path(profile)
 
     # Chrome locks the DB while running — copy to a temp file first
     with tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False) as tmp:
         tmp_path = tmp.name
 
     try:
-        shutil.copy2(CHROME_COOKIES_PATH, tmp_path)
+        shutil.copy2(cookies_path, tmp_path)
         conn = sqlite3.connect(tmp_path)
         cursor = conn.cursor()
         cursor.execute(

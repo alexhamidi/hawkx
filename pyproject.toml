@@ -1,0 +1,21 @@
+[project]
+name = "hawkx"
+version = "0.1.0"
+description = "CLI to fetch tweets from X using your Chrome session"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "cryptography",
+    "pyyaml",
+    "playwright",
+]
+
+[tool.setuptools.packages.find]
+include = ["hawkx*", "twitter*"]
+
+[tool.setuptools]
+py-modules = ["cli"]
+
+[project.scripts]
+hawkx = "cli:main"

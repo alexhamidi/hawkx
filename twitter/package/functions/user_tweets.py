@@ -38,7 +38,7 @@ def get_user_id(screen_name: str) -> str:
     return data["data"]["user"]["result"]["rest_id"]
 
 
-def get_user_tweets(screen_name: str, limit: int = 40) -> list[TimelineEntry]:
+def get_user_tweets(screen_name: str, limit: int = 40, include_replies: bool = False) -> list[TimelineEntry]:
     """
     Fetch up to `limit` timeline entries from a user's tweet feed via UserTweets.
     Resolves the screen name to a user ID internally, then paginates using the
@@ -49,6 +49,7 @@ def get_user_tweets(screen_name: str, limit: int = 40) -> list[TimelineEntry]:
         limit:       Max entries to return across all pages (default 40).
                      Each page fetches up to 20; cursor entries count toward the total
                      but can be filtered by the caller.
+    include_replies: If True, include reply tweets in the timeline (default False).
 
     Returns:
         list[TimelineEntry] — raw entries from TimelineAddEntries instructions.
@@ -79,6 +80,7 @@ def get_user_tweets(screen_name: str, limit: int = 40) -> list[TimelineEntry]:
             "withQuickPromoteEligibilityTweetFields": True,
             "withVoice": True,
             "withV2Timeline": True,
+            "includeReplies": include_replies,
         }
         if cursor:
             variables["cursor"] = cursor
