@@ -1,0 +1,4 @@
+requests
+cryptography
+pyyaml
+playwright

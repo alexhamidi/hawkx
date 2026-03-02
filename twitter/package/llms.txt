@@ -1,0 +1,25 @@
+# twitter
+
+> Python client for X's (Twitter's) internal GraphQL API. No API keys or developer account needed — reads session cookies directly from Chrome on macOS.
+
+Import from the top-level package: `from twitter import get_post, get_user_tweets, get_bookmarks`
+
+All functions return raw JSON dicts/lists. No parsing is done — the caller handles extraction.
+
+## Functions
+
+- `get_post(tweet_id: str) -> TweetDetailResponse`: Fetches the focal tweet and all reply threads. Returns a threaded conversation with instructions containing a `TimelineAddEntries` block whose entries are the focal tweet (`TimelineTimelineItem`) and reply threads (`TimelineTimelineModule`).
+- `get_post_simple(tweet_id: str) -> TweetByIdResponse`: Fetches a single tweet with no replies via the lighter `TweetResultByRestId` endpoint. Returns `data.tweetResult.result` as a `TweetResult`.
+- `get_user_tweets(screen_name: str, limit: int = 40) -> list[TimelineEntry]`: Paginates a user's tweet timeline. Resolves the handle to a user ID internally. Returns raw `TimelineEntry` items — caller filters out cursor entries.
+- `get_user_id(screen_name: str) -> str`: Resolves a screen name to a numeric user ID string.
+- `get_bookmarks(limit: int = 40) -> list[TimelineEntry]`: Paginates the authenticated user's bookmarks. Uses the session from Chrome cookies — no user ID needed. Returns raw `TimelineEntry` items.
+
+## Types
+
+- `TweetResult`: Top-level tweet object. Key fields: `rest_id` (tweet ID), `legacy: TweetLegacy`, `core.user_results.result: UserResult`, `views: TweetViews`, `source` (posting client as HTML string).
+- `TweetLegacy`: Core tweet data. Key fields: `full_text`, `created_at`, `conversation_id_str`, `favorite_count`, `retweet_count`, `reply_count`, `quote_count`, `bookmark_count`, `entities: TweetEntities`, `extended_entities` (full media list), `user_id_str`, `lang`, `is_quote_status`. Optional: `in_reply_to_status_id_str`, `retweeted_status_result`.
+- `UserResult`: User object. Key fields: `rest_id` (user ID), `core: UserCore` (`screen_name`, `name`, `created_at`), `legacy: UserLegacy` (`description`, `followers_count`, `friends_count`, `favourites_count`), `is_blue_verified`, `avatar.image_url`.
+- `TimelineEntry`: A single item in a paginated timeline. Fields: `entryId` (e.g. `tweet-123`, `cursor-bottom`), `sortIndex`, `content`. Content is one of `TimelineItemContent` (single tweet), `TimelineModuleContent` (reply thread), or `CursorContent` (pagination cursor).
+- `MediaEntity`: Media attachment on a tweet. Key fields: `type` (`photo` | `video` | `animated_gif`), `media_url_https` (thumbnail), `expanded_url`, `sizes: MediaSizes`. For video/gif: `video_info.variants` (list of `{url, content_type, bitrate?}`), `video_info.duration_millis`.
+- `TweetDetailResponse`: Response shape for `get_post`. Path to entries: `data.threaded_conversation_with_injections_v2.instructions` → find the `TimelineAddEntries` instruction → `.entries`.
+- `TweetByIdResponse`: Response shape for `get_post_simple`. Path to tweet: `data.tweetResult.result`.

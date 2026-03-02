@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Twitter API Integration Guide
 
-## Getting Started
+This repository contains scripts for fetching recent tweets from Twitter/X accounts using different approaches.
 
-First, run the development server:
+## Overview
 
+Due to recent changes in Twitter/X's API structure and access restrictions, different methods have been attempted:
+
+1. **twitter-scraper library** - Failed due to changes in Twitter/X's structure
+2. **Tweepy (Official Twitter API)** - Requires proper authentication setup
+3. **Direct web scraping** - Not reliable due to anti-scraping measures
+4. **python-twitter library** - Requires OAuth credentials
+
+## Recommended Solution: Twitter API v2
+
+The most reliable approach is using Twitter API v2 with proper authentication.
+
+## Setup Instructions
+
+### 1. Create Twitter Developer Account
+1. Go to https://developer.twitter.com/
+2. Sign in with your Twitter account
+3. Apply for a developer account if you don't have one
+4. Wait for approval (may take a few days)
+
+### 2. Create a New App
+1. Once approved, go to your developer dashboard
+2. Click "Create Project + App"
+3. Choose "Standalone App"
+4. Fill in the required details
+5. Give your app a name and description
+6. Complete the form and submit
+
+### 3. Get API Credentials
+1. Go to your App settings → Keys and tokens
+2. Generate a Bearer Token (for API v2)
+3. Copy the Bearer Token (this is your API key)
+
+### 4. Set Environment Variable
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+export TWITTER_BEARER_TOKEN="your_bearer_token_here"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 5. Run the Script
+```bash
+python twitter_api_v2.py
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Files
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `twitter_api_v2.py` - Main script using Twitter API v2 (recommended)
+- `twitter_old_api.py` - Alternative using legacy Twitter API (requires OAuth)
+- `scrape_x.py` - Web scraping approach (not recommended)
+- `fetch_tweets.py` - Various attempts with different libraries
 
-## Learn More
+## Troubleshooting
 
-To learn more about Next.js, take a look at the following resources:
+### Common Issues
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Authentication Errors**
+   - Ensure your Bearer Token is correct
+   - Check that your Twitter Developer account is approved
+   - Verify your App has the correct permissions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Rate Limiting**
+   - Twitter API has rate limits
+   - Wait if you hit rate limits
+   - Consider using app-only authentication for higher limits
 
-## Deploy on Vercel
+3. **User Not Found**
+   - Verify the username is correct
+   - Some accounts may be private or suspended
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Debug Mode
+Add `debug=True` parameter to API calls to see detailed request/response information.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Alternative Approaches
+
+If you cannot set up Twitter API access:
+
+1. **Use the web interface** directly at https://x.com/officialLoganK
+2. **Use third-party Twitter clients** that may have API access
+3. **Check if the account has other public profiles** (Instagram, LinkedIn, etc.)
+
+## Security Notes
+
+- Never share your API credentials publicly
+- Use environment variables instead of hardcoding tokens
+- Rotate credentials periodically
+- Monitor your API usage and costs
+
+## Support
+
+For Twitter API specific issues:
+- https://developer.twitter.com/en/support
+- Twitter Developer Forums: https://twittercommunity.com/
+
+For script issues:
+- Check the Twitter API documentation
+- Verify your credentials and permissions
+- Ensure you have the required Python packages installed
